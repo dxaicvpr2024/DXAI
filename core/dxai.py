@@ -144,7 +144,7 @@ def eval_xai(data_name, args, mission_name, classifier_type, use_true_labels=Tru
             details_dict[xai_method].probs_hists[details_dict[xai_method].betas.index(beta)] = np.round(1e3 * (probs_hists / class_counter).detach().cpu().numpy()) / 1e3
             details_dict[xai_method].values[details_dict[xai_method].betas.index(beta)] = np.round(1e3 * correct / total) / 1e3
             print('Accuracy of the network on the %d test images: %d %%' % (total, 100 * correct / total))
-            print_entropy_detatils(y_true, y_pred, entropy_list)
+            #print_entropy_detatils(y_true, y_pred, entropy_list)
 
             with open(details_dict_path, "wb") as fp:
                 pickle.dump(details_dict, fp)

@@ -8,8 +8,6 @@ http://creativecommons.org/licenses/by-nc/4.0/ or send a letter to
 Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 """
 from types import SimpleNamespace
-import torchmetrics
-import numpy as np
 import os
 from os.path import join as ospj
 import time
@@ -140,7 +138,7 @@ class Solver(nn.Module):
             optims.discriminator.step()
 
             # train the generator
-            g_loss, g_losses_latent1, ssim2disp = compute_g_loss(nets, args, x_real, y_trg, z_trgs=[z_trg, z_trg2],
+            g_loss, g_losses_latent1 = compute_g_loss(nets, args, x_real, y_trg, z_trgs=[z_trg, z_trg2],
                                                                  y_org=y_org, alpha_vec=alpha_vec, iteration=i)
             self._reset_grad()
             g_loss.backward()
@@ -166,10 +164,7 @@ class Solver(nn.Module):
                         all_losses[prefix + key] = value
                 log += ' '.join(['%s: [%.4f]' % (key, value) for key, value in all_losses.items()])
                 print(log)
-                if 'ssim2disp' in locals():
-                    if len(ssim2disp)>0:
-                        ssim2disp = ssim2disp.detach().cpu().numpy()
-                        print('mean ssim for each branch is: ', np.round(1000 * ssim2disp) / 1000)
+
             # save model checkpoints
             if i % args.save_every == 0:
                 print('saving checkpoint..')
@@ -245,12 +240,11 @@ def compute_g_loss(nets, args, x_real, y_trg, z_trgs=None, y_org=None, alpha_vec
         half_B = int(x_real.shape[0] / 2)
         x_fake = alpha_superposition(Psi, Res, alpha_vec, args)
 
-        if iteration % (5*args.print_every) == 0:
-            with torch.no_grad():
-                ssim = calc_ssim_each_branch(Psi, half_B, args)
-                mean_ssim = ssim.reshape(half_B, args.num_branches).mean(0)
-        else:
-            mean_ssim = []
+        # if iteration % (5*args.print_every) == 0:
+        #     with torch.no_grad():
+        #         ssim = calc_ssim_each_branch(Psi, half_B, args)
+        #         mean_ssim = ssim.reshape(half_B, args.num_branches).mean(0)
+        # else:
 
     if args.use_pretrained_classifier:
         out_real_fake, _ = nets.discriminator(x_fake, y_trg)
@@ -285,10 +279,9 @@ def compute_g_loss(nets, args, x_real, y_trg, z_trgs=None, y_org=None, alpha_vec
     else:
         sim_diff = x_fake - x_real
         l_sim = (sim_diff ** 2).mean() + sim_diff.abs().mean()
-        mean_ssim = -1 * torch.ones((1, args.img_channels))
         loss = args.lambda_adv * loss_adv + args.lambda_sim
         loss_latent = Munch(adv=loss_adv.item(), sim=l_sim.item())
-    return loss, loss_latent, mean_ssim
+    return loss, loss_latent
 
 
 def alpha_superposition(Psi, Res, alpha_vec, args):
@@ -401,13 +394,3 @@ def r1_reg(d_out, x_in):
     reg = 0.5 * grad_dout2.view(batch_size, -1).sum(1).mean(0)
     return reg
 
-
-def calc_ssim_each_branch(Psi, half_B, args):
-    # x~(2*half_B,C*N_branches,H,W)
-    criterion = torchmetrics.StructuralSimilarityIndexMeasure(reduction='none')
-    group1 = Psi[0:half_B]  # x~(half_B,C*N_branches,H,W)
-    group2 = Psi[half_B::]  # x~(half_B,C*N_branches,H,W)
-    group1 = group1.reshape(-1, args.img_channels, args.img_size, args.img_size)  # group1~(half_B*N_branches,C,H,W)
-    group2 = group2.reshape(-1, args.img_channels, args.img_size, args.img_size)  # group2~(half_B*N_branches,C,H,W)
-    ssim = criterion(group1, group2)  # ssim~(half_B*N_branches,)
-    return ssim.detach()

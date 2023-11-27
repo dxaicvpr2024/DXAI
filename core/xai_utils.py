@@ -10,7 +10,7 @@ from core.branch_utils import sum_groups
 from core.model import build_model, load_pretrained_classifier
 import matplotlib.pyplot as plt
 from core.utils import save_image, make_anomaly_heatmap, tensor_contrast_stretch, tensor2ndarray255
-from sklearn.metrics import confusion_matrix
+#from sklearn.metrics import confusion_matrix
 from torch.nn import functional as F
 from skimage.segmentation import slic, mark_boundaries
 from captum._utils.models.linear_model import SkLearnLasso
@@ -420,7 +420,7 @@ def load_classifier(classifier_type, data_name, args, num_of_classes, device, ne
         classifier = nets.discriminator
     return classifier
 
-
+'''
 def print_entropy_detatils(y_true, y_pred, entropy_list):
     cf_matrix = np.round(1e3*confusion_matrix(y_true, y_pred, normalize='true'))/1e3
     if cf_matrix.shape[0]<=3:
@@ -429,7 +429,7 @@ def print_entropy_detatils(y_true, y_pred, entropy_list):
     entropy_list = torch.stack(entropy_list)
     print('entropy mean:     ', entropy_list.mean(0).cpu().numpy())
     print('entropy std:      ', entropy_list.std(0).cpu().numpy())
-
+'''
 
 def slic2tensor(images, n_segments=256):
     N, C, H, W = images.size()

@@ -14,7 +14,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torchvision.utils as vutils
-import torchmetrics
+#import torchmetrics
 from core.branch_utils import sum_groups
 import cv2
 
@@ -227,17 +227,17 @@ def test_anomaly(nets, args, x_src, y_src, x_ref, filename, use_z=True, batch_id
     real_MSE = ((x_src - x_real_rec) ** 2).mean(dim=(1, 2, 3))
     PSNR = 20 * torch.log10(torch.sqrt((M**2) / (real_MSE + 1e-8)))
     
-    criterion = torchmetrics.StructuralSimilarityIndexMeasure(reduction='none')
-    ssim = criterion(x_src, x_real_rec)
+    #criterion = torchmetrics.StructuralSimilarityIndexMeasure(reduction='none')
+    #ssim = criterion(x_src, x_real_rec)
 
     if use_z:
         print('usez_SNR: ', SNR.cpu())
         print('usez_PSNR: ', PSNR.mean().cpu())
-        print('usez_SSIM: ', ssim.mean().cpu())
+        #print('usez_SSIM: ', ssim.mean().cpu())
     else:
         print('enc_SNR: ', SNR.cpu())
         print('enc_PSNR: ', PSNR.mean().cpu())
-        print('enc_SSIM: ', ssim.mean().cpu())
+        #print('enc_SSIM: ', ssim.mean().cpu())
     
     return PSNR
 
