@@ -1,4 +1,6 @@
 import argparse
+
+
 def load_args():
     parser = argparse.ArgumentParser()
     # changed
@@ -11,7 +13,7 @@ def load_args():
     parser.add_argument('--lambda_class_fake', type=float, default=2, help='adversarial loss for generator')
 
     parser.add_argument('--lambda_sim', type=float, default=4, help='Weight for similarity loss')
-    parser.add_argument('--lambda_grad_sim', type=float, default=4, help='Weight for gradients similarity loss')
+    parser.add_argument('--lambda_grad_sim', type=float, default=0, help='Weight for gradients similarity loss')
     parser.add_argument('--lambda_ano_sim', type=float, default=4, help='Weight for anomaly similarity loss')
 
     parser.add_argument('--lambda_params_corr', type=float, default=1, help='Weight for params corr regularization')

@@ -10,12 +10,9 @@ Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 
 from os.path import join as ospj
 import json
-from tqdm import tqdm
-import ffmpeg
 import numpy as np
 import torch
 import torch.nn as nn
-import torchvision
 import torchvision.utils as vutils
 import torchmetrics
 from core.branch_utils import sum_groups
@@ -29,10 +26,6 @@ def my_gradient(x):
     dx = torch.cat((z, dx), dim=3)
     dy = torch.cat((z.permute((0, 1, 3, 2)), dy), dim=2)
     return dx, dy
-
-def save_json(json_file, filename):
-    with open(filename, 'w') as f:
-        json.dump(json_file, f, indent=4, sort_keys=False)
 
 
 def print_network(network, name):
@@ -64,55 +57,9 @@ def save_image(x, ncol, filename, denorm=True):
     vutils.save_image(x.cpu(), filename, nrow=ncol, padding=0)
 
 
-
-@torch.no_grad()
-def translate_using_reference(nets, args, x_src, x_ref, y_ref, filename):
-    N, C, H, W = x_src.size()
-    wb = torch.ones(1, C, H, W).to(x_src.device)
-    x_src_with_wb = torch.cat([wb, x_src], dim=0)
-
-    # masks = nets.fan.get_heatmap(x_src) if args.w_hpf > 0 else None
-    s_ref = nets.style_encoder(x_ref, y_ref)
-    s_ref_list = s_ref.unsqueeze(1).repeat(1, N, 1)
-    x_concat = [x_src_with_wb]
-    for i, s_ref in enumerate(s_ref_list):
-        x_fake = nets.generator(x_src, s_ref)
-        x_fake_with_ref = torch.cat([x_ref[i:i+1], x_fake], dim=0)
-        x_concat += [x_fake_with_ref]
-
-    x_concat = torch.cat(x_concat, dim=0)
-    save_image(x_concat, N+1, filename)
-    del x_concat
-
-
-def mix_2_styles(s_src, s_ref, mode, style_dim):
-
-    if mode == 'interp':
-        s_combined = 0.5 * (s_src + s_ref)
-    elif mode == 'twopart':
-        start = 0 * style_dim  # start and end has to be in kfulot of style_dim, since the s's are colusracked style vectors
-        end = 3 * style_dim
-
-        s_combined = torch.cat((s_ref[:, :start],s_src[:, start:end], s_ref[:, end:]), dim=1)
-
-        # print(s_combined)
-        # print(s_src)
-        # print(s_ref)
-
-        # print(s_ref.shape)
-        # print(s_src.shape)
-        # print(s_ref[:, :start].shape)
-        # print(s_src[:, start:end].shape)
-        # print(s_ref[:, end:].shape)
-        # print(s_src.shape)
-
-    return s_combined, s_src, s_ref
-
-
 @torch.no_grad()
 def test_psi(nets, args, x_src, y_src, x_ref, y_ref, filename, use_z=False, time_factor=1, return_psi = False, alpha=1, phi_filt=None, psi_filt=None, filt_len=0, dont_cat_ref=True, step=0, batch_idx=0):
     N, C, H, W = x_src.size()
-    wb = torch.ones(1, C, H, W).to(x_src.device)
 
     y_ref = torch.tensor(list(range(min(args.val_batch_size, args.num_domains)))).to(x_src.device)
 
@@ -121,7 +68,6 @@ def test_psi(nets, args, x_src, y_src, x_ref, y_ref, filename, use_z=False, time
 
     s_ref_list = s_ref.unsqueeze(1).repeat(1, N, 1)
     print(len(s_ref_list))
-
 
     for i, s_ref in enumerate(s_ref_list):
         print(i)
@@ -295,6 +241,7 @@ def test_anomaly(nets, args, x_src, y_src, x_ref, filename, use_z=True, batch_id
     
     return PSNR
 
+
 def make_anomaly_heatmap(anomaly_branch, x_src, flip_rgb=True, show=False):
     device = x_src.device
     if x_src.shape[1] == 1:
@@ -333,7 +280,6 @@ def make_anomaly_heatmap(anomaly_branch, x_src, flip_rgb=True, show=False):
     super_imposed_img = torch.from_numpy(((super_imposed_img.astype(np.float)/255)-0.5) / 0.5).permute(0, 3, 1, 2).to(device).float()
     return super_imposed_img
 
-    
 
 def tensor_contrast_stretch(x):
     N, C, H, W = x.size()

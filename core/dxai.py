@@ -16,7 +16,6 @@ def eval_xai(data_name, args, mission_name, classifier_type, use_true_labels=Tru
     batch_size = 1
 
     args.resume_iter = get_last_resume_iter('./expr/checkpoints_'+data_name+'_'+mission_name)
-    
     threshold2plot = 30
 
     if experiment_type in 'global_beta':
@@ -71,6 +70,7 @@ def eval_xai(data_name, args, mission_name, classifier_type, use_true_labels=Tru
     print('PATH is:     ', branch_path)
     print('run name is: ', run_name)
     print('details-dict path is: ', details_dict_path.replace(run_name, ''))
+    print(args.resume_iter)
 
     nets = load_branch_gan_networks(args, branch_path, device)
     resnet_classifier = load_classifier('resnet18', data_name, args, num_of_classes, device)
@@ -156,6 +156,7 @@ def eval_xai(data_name, args, mission_name, classifier_type, use_true_labels=Tru
         compute_AUC(details_dict, run_name, args, classifier_type, iters_num, global_beta, T=max(beta_list))
 
     save_accuracy_figure(details_dict, args, num_of_classes, data_name, mission_name, run_name, iters_num, classifier_type, global_beta)
+
     '''
     for key in details_dict.keys():# 'dxai'
         #print([h for h in details_dict[key].probs_hists])

@@ -15,8 +15,6 @@ from torch.nn import functional as F
 from skimage.segmentation import slic, mark_boundaries
 from captum._utils.models.linear_model import SkLearnLasso
 
-from metrics.fid import calculate_fid_given_paths
-
 from captum.attr import (
     GradientShap, DeepLift,
     IntegratedGradients,
@@ -344,47 +342,6 @@ def save_attributions_for_fid(images, attributions, args, classifier_type, xai_m
             save_image(attributions[k], ncol=1, filename=folder_name+os.sep+image_name)
         else:
             save_image(images[k]*attributions[k].abs(), ncol=1, filename=folder_name+os.sep+image_name)
-
-
-def calc_fid_for_attributions(data_name, run_name, args, classifier_type):
-    path_real = '/home/elnatankadar/Data' + os.sep + data_name + os.sep + 'val'
-    fid = []
-    methods = []
-    if os.path.isfile(run_name + os.sep + 'fid.txt'):
-        data = np.genfromtxt(run_name + os.sep + 'fid.txt', delimiter=',', dtype=None)
-        print(data)
-        
-        for t in data:
-            methods.append(str(t[0]).replace("b'", '').replace("'", ''))
-            fid.append(t[1])
-       
-    list_dirs = sorted(os.listdir(run_name + os.sep + str(args.resume_iter)+'_'+classifier_type+'_attributions'))
-    for method in list_dirs:
-        path_attributions = run_name + os.sep + 'attributions' + os.sep + method
-        print('calc FID for ' + method + ' attributions...')
-        if method not in methods:
-            fid_value = calculate_fid_given_paths(
-                            paths=[path_real, path_attributions],
-                            batch_size=8)
-            print('FID = ',  fid_value)
-
-            fid.append(fid_value)
-            methods.append(method)
-            
-            file = open(run_name + os.sep + 'fid.txt', 'a')
-            for ff in zip(methods, fid):
-                file.write(str(ff[0])+', '+str(ff[1])+'\n')
-            file.close()
-
-            plt.bar(methods, fid, width=0.3)
-            plt.xticks(range(len(methods)), methods, rotation=-80)
-
-            plt.title(data_name + ' - FID')    
-            plt.ylabel('FID', fontsize=17)
-            plt.grid(True)
-            plt.savefig(run_name + os.sep + str(args.resume_iter)+'_fid.png', format='png', bbox_inches="tight")
-            plt.close()
-            print('FID figure saved..')        
 
         
 def print_dictionary(details_dict):
