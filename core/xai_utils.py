@@ -10,7 +10,6 @@ from core.branch_utils import sum_groups
 from core.model import build_model, load_pretrained_classifier
 import matplotlib.pyplot as plt
 from core.utils import save_image, make_anomaly_heatmap, tensor_contrast_stretch, tensor2ndarray255
-#from sklearn.metrics import confusion_matrix
 from torch.nn import functional as F
 from skimage.segmentation import slic, mark_boundaries
 from captum._utils.models.linear_model import SkLearnLasso
@@ -117,7 +116,7 @@ def prepare_method_of_xai(xai_method, model, classifier_type, lrp_classifier_typ
     elif 'GradientShap' in xai_method:
         method = GradientShap(model.forward)
     elif 'Lime' in xai_method:
-        method = Lime(model.forward, interpretable_model=SkLearnLasso(beta=0.01))
+        method = Lime(model.forward, interpretable_model=SkLearnLasso(alpha=0.01))
     elif 'DeepLift' in xai_method:
         method = DeepLift(model)
     else:
@@ -228,7 +227,7 @@ def make_attribution_map_and_mask(xai_method, method, images, labels2xai, args, 
                            distinction_agnostic_folder + os.sep + str(labels2xai.item())+'_'+str(index+1) + '_heatmap.png')
             save_image(torch.cat((images, CD, CA), dim=-1), 3,
                        distinction_agnostic_folder + os.sep + str(labels2xai.item())+'_'+str(index+1) + '.png')
-    return attributions, masks, x2class
+    return attributions, masks, x2class.float()
 
 
 def make_xai_labels(labels, use_true_labels, num_of_classes):
@@ -452,7 +451,7 @@ def get_last_resume_iter(path, return_all_iters=False):
     for file in os.listdir(path):
         iter = int(file[0:6])
         iters_list.append(iter)
-        if 'ema' in file and iter > max_resume_iter:
+        if 'ema' in file and iter >= max_resume_iter:
             max_resume_iter = iter
     iters_list.sort()
     if return_all_iters:

@@ -33,7 +33,6 @@ def eval_xai(data_name, args, mission_name, classifier_type, use_true_labels=Tru
 
     methods_list = ['rand', 'dxai', 'LayerGradCam', 'GuidedGradCam',
                     'GradientShap', 'Lime', 'lrp_relu', 'InternalInfluence', 'IntegratedGradients']
-    
     beta_list = [0, 0.01, 0.05, 0.1, 0.15, 0.2]
     if global_beta:
         beta_list = [0, 0.25, 0.5, 0.75, 1]

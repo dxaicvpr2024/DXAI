@@ -90,7 +90,6 @@ class Solver(nn.Module):
         # fetch random validation images for debugging
         fetcher = InputFetcher(loaders.src, loaders.ref, args.latent_dim, 'train')
         fetcher_val = InputFetcher(loaders.val, None, args.latent_dim, 'val')
-        inputs_val = next(fetcher_val)
 
         # resume training if necessary
         if args.resume_iter > 0:
@@ -107,25 +106,25 @@ class Solver(nn.Module):
             z_trg, z_trg2 = inputs.z_trg, inputs.z_trg2
 
             if args.alpha_blend:
-                half_B = torch.floor(torch.tensor(x_real.shape[0] / 2)).int()
-                from_start = torch.bernoulli(torch.tensor(0.5)).to(x_real.device)
-                x_real = from_start * x_real[0:half_B] + (1 - from_start) * x_real[half_B::]
+                #half_B = torch.floor(torch.tensor(x_real.shape[0] / 2)).int()
+                #from_start = torch.bernoulli(torch.tensor(0.5)).to(x_real.device)
+                #x_real = from_start * x_real[0:half_B] + (1 - from_start) * x_real[half_B::]
                 x_real = x_real.repeat(2, 1, 1, 1)
-                y_org = from_start * y_org[0:half_B] + (1 - from_start) * y_org[half_B::]
+                #y_org = from_start * y_org[0:half_B] + (1 - from_start) * y_org[half_B::]
                 y_org = y_org.repeat(2).long()
                 if args.num_domains == 2:
-                    y_trg = from_start * y_trg[0:half_B] + (1 - from_start) * y_trg[half_B::]
+                    #y_trg = from_start * y_trg[0:half_B] + (1 - from_start) * y_trg[half_B::]
                     y_trg = torch.cat((y_trg, 1 - y_trg)).long().to(x_real.device)
                 else:
-                    y_trg = from_start * y_org[0:half_B] + (1 - from_start) * y_org[half_B::]
+                    #y_trg = from_start * y_org[0:half_B] + (1 - from_start) * y_org[half_B::]
                     y_other = args.num_domains*torch.ones_like(y_trg)
-                    for jj in range(half_B):
+                    for jj in range(y_trg.size(0)):
                         class_list = list(range(0, args.num_domains))
                         class_list.remove(int(y_trg[jj].detach().cpu().numpy()))
                         y_other[jj] = random.choice(class_list)
                     y_trg = torch.cat((y_trg, y_other)).long().to(x_real.device)    
-                z_trg = z_trg[0:2 * half_B]
-                alpha_vec = torch.rand((half_B, args.num_branches - 1)).to(x_real.device)
+                z_trg = torch.randn(x_real.size(0), args.latent_dim).to(x_real.device)
+                alpha_vec = torch.rand((x_real.size(0)//2, args.num_branches - 1)).to(x_real.device)
                 alpha_vec = alpha_vec.repeat_interleave(repeats=args.img_channels, dim=1).unsqueeze(-1).unsqueeze(-1)
             else:
                 alpha_vec = None

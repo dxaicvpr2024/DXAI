@@ -9,12 +9,10 @@ Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 """
 
 from os.path import join as ospj
-import json
 import numpy as np
 import torch
 import torch.nn as nn
 import torchvision.utils as vutils
-#import torchmetrics
 from core.branch_utils import sum_groups
 import cv2
 
@@ -58,7 +56,7 @@ def save_image(x, ncol, filename, denorm=True):
 
 
 @torch.no_grad()
-def test_psi(nets, args, x_src, y_src, x_ref, y_ref, filename, use_z=False, time_factor=1, return_psi = False, alpha=1, phi_filt=None, psi_filt=None, filt_len=0, dont_cat_ref=True, step=0, batch_idx=0):
+def test_psi(nets, args, x_src, y_src, filename, batch_idx=0):
     N, C, H, W = x_src.size()
 
     y_ref = torch.tensor(list(range(min(args.val_batch_size, args.num_domains)))).to(x_src.device)
@@ -77,19 +75,7 @@ def test_psi(nets, args, x_src, y_src, x_ref, y_ref, filename, use_z=False, time
             x_fake = sum_groups(Psi, phi_depth=args.img_channels)
 
         x_concat = [x_src]
-        mask_concat = [x_src]
-        x_cumsum_concat = [x_src]
-
-        # concatenate as list
-        if dont_cat_ref:
-            x_fake_with_ref = x_fake
-        else:
-            x_fake_with_ref = torch.cat([x_ref[i:i + 1], x_fake], dim=0)  # option 2 (orig): concat with reference im
-
-        x_concat += [x_fake_with_ref]
-        mask_concat += [x_fake_with_ref]
-
-        accum = Residual
+        x_concat += [x_fake]
 
         ## show psis
 
@@ -98,17 +84,9 @@ def test_psi(nets, args, x_src, y_src, x_ref, y_ref, filename, use_z=False, time
         for p in range(int(Psi.shape[1]/args.img_channels)):
             # choose psi (each psi is 3-channel, so that their sum is RGB)
             psi = Psi[:, args.img_channels*p:(args.img_channels*p+args.img_channels), :, :]
-            mask = Masks[:, args.img_channels*p:(args.img_channels*p+args.img_channels), :, :]
-            accum += psi
 
             # concatenate as list
-            psi_with_ref = psi #torch.cat([wb, psi], dim=0)  # option 1 (as above)
-            mask_with_ref = mask #torch.cat([wb, mask], dim=0)  # option 1 (as above)
-            psi_cumsum_with_ref = accum # torch.cat([wb, accum], dim=0)
-
-            x_concat += [psi_with_ref]
-            mask_concat += [mask_with_ref]
-            x_cumsum_concat += [psi_cumsum_with_ref]
+            x_concat += [psi]
 
         # convert concatenated list to pytorch tensor
         x_concat = torch.cat(x_concat, dim=0)
@@ -117,14 +95,13 @@ def test_psi(nets, args, x_src, y_src, x_ref, y_ref, filename, use_z=False, time
         ref_label = str(int(y_ref[i].detach().cpu()))
         fname = filename+'_ref_'+ref_label + '_' + str(i) + '.png'
         if batch_idx > 0:
-            fname = filename+'_ref_'+ref_label + '_' + str(i)  + '_' + str(batch_idx)+ '.png'
+            fname = filename+'_ref_'+ref_label + '_' + str(i) + '_' + str(batch_idx) + '.png'
         print('saving ' + fname)
-        print(x_concat.shape)
         save_image(x_concat, N, fname)
 
 
 @torch.no_grad()
-def test_anomaly(nets, args, x_src, y_src, x_ref, filename, use_z=True, batch_idx=0, mean_num=1):
+def test_anomaly(nets, args, x_src, y_src, filename, batch_idx=0, mean_num=1):
 
     N, C, H, W = x_src.size()
 
@@ -132,15 +109,11 @@ def test_anomaly(nets, args, x_src, y_src, x_ref, filename, use_z=True, batch_id
     psi_trg = torch.zeros((N, args.num_branches*C, H, W, args.num_domains)).to(x_src.device)
     y_list = list(range(min(args.val_batch_size, args.num_domains)))
     for mean_i in range(mean_num):
-        z_trg = torch.randn(x_ref.size(0), args.latent_dim).to(x_ref.device)
+        z_trg = torch.randn(1, args.latent_dim).to(x_src.device)
         for y in y_list:
-            #print('y: ', y)
             y_ref = y*torch.ones(1).to(x_src.device).long()
-            #print(y_ref)
-            if use_z:
-                s_ref = nets.mapping_network(z_trg, y_ref)
-            else:
-                s_ref = nets.style_encoder(x_src, y_ref)
+            s_ref = nets.mapping_network(z_trg, y_ref)
+
             s_ref = s_ref.repeat((x_src.size(0), 1))
             x_fake, Psi, Phi, Residual, Masks = nets.generator(x_src, s_ref)
             if args.zero_st:
@@ -149,13 +122,10 @@ def test_anomaly(nets, args, x_src, y_src, x_ref, filename, use_z=True, batch_id
             x_trg[:, :, :, :, y] += x_fake / mean_num
             psi_trg[:, :, :, :, y] += Psi / mean_num
 
-    x_src_expand = x_src[:,:,:,:,None]
-    err = (x_src_expand - x_trg) #*torch.abs(psi_trg[:, 0:args.img_channels, :, :, 0]-psi_trg[:, 0:args.img_channels, :, :, 1])
-    # print(err.shape)
+    x_src_expand = x_src[:, :, :, :, None]
+    err = (x_src_expand - x_trg)
     mean_err = err.mean(dim=(1,2,3))
-    # print(mean_err.shape)
     _, y_est = torch.min(mean_err, dim=1)
-    #print(y_est)
     x_rec = torch.zeros_like(x_src).to(x_src.device)
     x_real_rec = torch.zeros_like(x_src).to(x_src.device)
     anomaly_diff_clean = torch.zeros_like(x_src).to(x_src.device)
@@ -169,76 +139,39 @@ def test_anomaly(nets, args, x_src, y_src, x_ref, filename, use_z=True, batch_id
         err2show[i] = err[i, :, :, :, y_src[i]].squeeze(-1)
         anomaly_diff_clean[i] = (psi_trg[i, 0:args.img_channels, :, :, y_est[i]]-psi_trg[i, 0:args.img_channels, :, :, 1-y_est[i]]).abs()
         anomaly_diff_clean[i] = (anomaly_diff_clean[i]*(psi_trg[i, 0:args.img_channels, :, :, y_src[i]].abs())).squeeze(-1)
-        
 
-    if batch_idx<20:
+    if batch_idx < 20:
         x2show = [x_src]
         x2show += [x_real_rec]
         x2show += [tensor_contrast_stretch(err2show)]
         for dd in range(args.num_domains):
             x2show += [psi_trg[:, 0:args.img_channels, :, :, dd].squeeze(-1)]
         
-        if args.num_domains==2:
+        if args.num_domains == 2:
             anomaly_diff = x_trg[:, :, :, :, 0]-x_trg[:, :, :, :, 1]
-            x2show += [(anomaly_diff)]
-        
-            gx_0, gy_0 = my_gradient(x_trg[:, :, :, :, 0])
-            TV_0 = gx_0.abs() + gy_0.abs()
-            gx_1, gy_1 = my_gradient(x_trg[:, :, :, :, 1])
-            TV_1 = gx_1.abs() + gy_1.abs()
-            TV_diff = TV_0 - TV_1
-            
-            if args.img_channels == 1:
-                anomaly_diff_abs = anomaly_diff.abs() 
-                TV_diff_abs = TV_diff.abs()
-            else:
-                anomaly_diff_abs = anomaly_diff.abs().mean(1, keepdim=True).repeat(1, 3, 1, 1)
-                TV_diff_abs = TV_diff.abs().mean(1, keepdim=True).repeat(1, 3, 1, 1)
-        
-            x2show += [2 * anomaly_diff_abs - 1]
-            x2show += [2*tensor_contrast_stretch(anomaly_diff_clean**0.25)-1]
-        
-        #blur_TV = gradual_gaussian_blur(TV_diff_abs, kernel_size=13, sigma=3, filter_num=5, channels=args.img_channels)
-        
+            x2show += [anomaly_diff]
+
         x2show += [make_anomaly_heatmap(x_anomaly, x_src)]
-        #anomaly_heatmap[blur_TV < 0.02] = 0
-        #x2show += [blur_TV]
-        #x2show += [2 * anomaly_heatmap*(x_trg[:, :, :, :, 0]*x_trg[:, :, :, :, 1]).abs().sqrt() - 1]
-        
-        #if mean_num > 1:
-        #    x2show += [x_trg[:, :, :, :, 0].squeeze(-1)]
-        #    x2show += [x_trg[:, :, :, :, 1].squeeze(-1)]
-        
+
         if args.img_channels == 1:
             for ii in range(len(x2show)):
-                if x2show[ii].shape[1]==1:
-                    x2show[ii] = torch.cat((x2show[ii],x2show[ii],x2show[ii]), dim=1)
+                if x2show[ii].shape[1] == 1:
+                    x2show[ii] = torch.cat((x2show[ii], x2show[ii], x2show[ii]), dim=1)
         
         x2show = torch.cat(x2show, dim=0)
-        # print(x2show.shape)
         # save
-        fname = filename + '_anomalies' + '_' + str(batch_idx)+'_mean_num_'+str(mean_num)+'_.png'
+        fname = filename + '_distinctions' + '_' + str(batch_idx)+'_mean_num_'+str(mean_num)+'_.png'
         print('saving anomaly ' + fname)
         save_image(x2show, N, fname)
     SNR = 20*torch.log10(torch.sqrt((x_src**2).mean()/(((x_src-x_rec)**2).mean()+1e-8)))
 
-    # M, _ = x_src.reshape((N, C*H*W)).max(dim=1)
     M = 1
-    real_MSE = ((x_src - x_real_rec) ** 2).mean(dim=(1, 2, 3))
-    PSNR = 20 * torch.log10(torch.sqrt((M**2) / (real_MSE + 1e-8)))
-    
-    #criterion = torchmetrics.StructuralSimilarityIndexMeasure(reduction='none')
-    #ssim = criterion(x_src, x_real_rec)
+    MSE = ((x_src - x_real_rec) ** 2).mean(dim=(1, 2, 3))
+    PSNR = 20 * torch.log10(torch.sqrt((M**2) / (MSE + 1e-8)))
 
-    if use_z:
-        print('usez_SNR: ', SNR.cpu())
-        print('usez_PSNR: ', PSNR.mean().cpu())
-        #print('usez_SSIM: ', ssim.mean().cpu())
-    else:
-        print('enc_SNR: ', SNR.cpu())
-        print('enc_PSNR: ', PSNR.mean().cpu())
-        #print('enc_SSIM: ', ssim.mean().cpu())
-    
+    print('usez_SNR: ', SNR.cpu())
+    print('usez_PSNR: ', PSNR.mean().cpu())
+
     return PSNR
 
 
@@ -295,11 +228,10 @@ def tensor_contrast_stretch(x):
 @torch.no_grad()
 def debug_image(nets, args, inputs, step, laptop_mode=False):
     x_src, y_src = inputs.x_src, inputs.y_src
-    x_ref, y_ref = inputs.x_ref, inputs.y_ref
 
     filename = ospj(args.sample_dir, '%06d_test_psi' % (step))
-    test_psi(nets, args, x_src, y_src, x_ref, y_ref, filename + '_usez', use_z=True, step=step)
-    psnr = test_anomaly(nets, args, x_src, y_src, x_ref, filename + '_usez', use_z=True, batch_idx=0)
+    test_psi(nets, args, x_src, y_src, filename + '_usez')
+    psnr = test_anomaly(nets, args, x_src, y_src, filename + '_usez', batch_idx=0)
     
 
 def tensor2ndarray255(images, denormalize=False):
@@ -307,7 +239,7 @@ def tensor2ndarray255(images, denormalize=False):
         images = torch.clamp(images * 0.5 + 0.5, 0, 1)
     else:
         images = torch.clamp(images, 0, 1)
-    if len(images.shape)>3:
+    if len(images.shape) > 3:
         return images.cpu().detach().numpy().transpose(0, 2, 3, 1) * 255
     else:
         return images.cpu().detach().numpy().transpose(1, 2, 0) * 255

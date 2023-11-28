@@ -15,7 +15,7 @@ log_file_name = 'output_log/log_'+data_name+'_'+mission_name+'.log'
 
 os.system('echo cuda device id: '+cuda_id+' >> ' + log_file_name)
 
-cmd = 'CUDA_VISIBLE_DEVICES='+cuda_id+' python main.py --mode train\
+cmd = 'CUDA_VISIBLE_DEVICES='+cuda_id+' python main.py --mode eval\
       --sample_dir expr/samples_'+data_name+'_'+mission_name+'\
       --checkpoint_dir expr/checkpoints_'+data_name+'_'+mission_name+'\
       --src_dir assets/'+data_name+'\
@@ -27,11 +27,13 @@ cmd = 'CUDA_VISIBLE_DEVICES='+cuda_id+' python main.py --mode train\
       --use_pretrained_classifier 1 --classifier_type resnet18\
       --num_branches 5\
       --img_channels 3 --branch_dimin 7 --softmax_temp 1\
-      --img_size 256 --batch_size 4\
-      --sample_every 2500 --save_every 10000 --total_iters 251 \
-      --max_eval_iter 1500\
+      --img_size 256 --batch_size 2\
+      --sample_every 50 --save_every 50 --total_iters 51 \
+      --max_eval_iter 15\
       --lr 0.0001  --f_lr 0.000001\
-      --noise_every 500000  >> '+log_file_name+' &'
+      --noise_every 500000  &> '+log_file_name+' &'
 
 print(cmd)
 os.system(cmd)
+print('end of training')
+#os.system(cmd.replace('--mode train', '--mode eval'))

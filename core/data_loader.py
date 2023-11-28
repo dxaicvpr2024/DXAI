@@ -24,6 +24,7 @@ from torchvision import transforms
 from torchvision.datasets import ImageFolder
 import torchvision.transforms.functional as TF
 
+
 def listdir(dname):
     fnames = list(chain(*[list(Path(dname).rglob('*.' + ext))
                           for ext in ['png', 'jpg', 'jpeg', 'JPG']]))
