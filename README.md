@@ -23,4 +23,13 @@ pip install -U scikit-learn
 pip install captum
 ```
 ## Data
-
+Download AFHQ dataset and pretrained network.
+```bash
+bash download.sh celeba-hq-dataset
+bash download.sh pretrained-network-celeba-hq
+```
+Download AFHQ dataset and pretrained network.
+```bash
+bash download.sh afhq-dataset
+bash download.sh pretrained-network-afhq
+```
