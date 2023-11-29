@@ -26,6 +26,12 @@ elif  [ $FILE == "afhq-dataset" ]; then
     unzip $ZIP_FILE -d ./data
     rm $ZIP_FILE
 
+elif  [ $FILE == "pretrained-network-afhq" ]; then
+    wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=12MVga-DdXbhLk7RoKT9wfjKTnKSs7Hw5' -O afhq_resnet18_ch_3_weights.ckpt
+
+elif  [ $FILE == "pretrained-network-celeba-hq" ]; then
+    wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=1S7yPXhkk-eK7YCvcNVjFNC6xuBPSkM2D' -O celeba_hq_resnet18_ch_3_weights.ckpt
+        
 else
     echo "Available arguments are pretrained-network-celeba-hq, pretrained-network-afhq, celeba-hq-dataset, and afhq-dataset."
     exit 1
