@@ -178,8 +178,6 @@ class Solver(nn.Module):
                 os.makedirs(args.sample_dir, exist_ok=True)
                 inputs = {'x_src': src.x, 'x_ref': ref.x, 'y_src': src.y, 'y_ref': ref.y}
                 inputs = SimpleNamespace(**inputs)
-
-                args.result_dir = args.sample_dir
                 utils.debug_image(nets_ema, args, inputs=inputs, step=step)
 
 
