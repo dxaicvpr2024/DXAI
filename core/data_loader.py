@@ -198,22 +198,13 @@ class InputFetcher:
             x, y = next(self.iter)
         return x, y
 
-    def _fetch_refs(self):
-        try:
-            x, x2, y = next(self.iter_ref)
-        except (AttributeError, StopIteration):
-            self.iter_ref = iter(self.loader_ref)
-            x, x2, y = next(self.iter_ref)
-        return x, x2, y
-
     def __next__(self):
         x, y = self._fetch_inputs()
         if self.mode == 'train':
-            x_ref, x_ref2, y_ref = self._fetch_refs()
+            # x_ref, x_ref2, y_ref = self._fetch_refs()
             z_trg = torch.randn(x.size(0), self.latent_dim)
             z_trg2 = torch.randn(x.size(0), self.latent_dim)
-            inputs = Munch(x_src=x, y_src=y, y_ref=y_ref,
-                           x_ref=x_ref, x_ref2=x_ref2,
+            inputs = Munch(x_src=x, y_src=y,
                            z_trg=z_trg, z_trg2=z_trg2)
         elif self.mode == 'val':
             x_ref, y_ref = self._fetch_inputs()

@@ -17,13 +17,20 @@ conda activate dxai
 pip install -r requirements.txt
 ```
 ## Data
-Download AFHQ dataset and pretrained network.
+Download AFHQ dataset and pretrained models.
 ```bash
 bash download.sh afhq-dataset
-bash download.sh pretrained-network-afhq
+bash download.sh pretrained-resnet18-afhq
+bash download.sh pretrained-dxai-afhq
+
 ```
-Download CelebA-hq dataset and pretrained network.
+Download CelebA-hq dataset and pretrained models.
 ```bash
 bash download.sh celeba-hq-dataset
-bash download.sh pretrained-network-celeba-hq
+bash download.sh pretrained-resnet18-celeba-hq
+bash download.sh pretrained-dxai-celeba-hq
+
 ```
+## Evaluation
+
+## Training

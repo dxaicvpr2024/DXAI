@@ -1,8 +1,8 @@
 import os
 
 data_list = ['celeba_hq', 'afhq']
-data_name = data_list[0]
-cuda_id = '0'
+data_name = data_list[14]
+cuda_id = '1'
 mission_name = 'try_dxai'
 
 if not os.path.isdir('output_log'):
@@ -25,8 +25,8 @@ cmd = 'CUDA_VISIBLE_DEVICES='+cuda_id+' python main.py --mode train\
       --num_branches 5\
       --img_channels 3\
       --img_size 256 --batch_size 2\
-      --sample_every 150 --save_every 150 --total_iters 151 \
-      --max_eval_iter 15 &> '+log_file_name+' &'
+      --sample_every 500 --save_every 500 --total_iters 2501 \
+      --max_eval_iter 15 >> '+log_file_name+' &'
 
 print(cmd)
 os.system(cmd)

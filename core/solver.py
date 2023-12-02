@@ -88,8 +88,8 @@ class Solver(nn.Module):
         optims = self.optims
 
         # fetch random validation images for debugging
-        fetcher = InputFetcher(loaders.src, loaders.ref, args.latent_dim, 'train')
-        fetcher_val = InputFetcher(loaders.val, None, args.latent_dim, 'val')
+        fetcher = InputFetcher(loaders.src, None, args.latent_dim, 'train')
+        # fetcher_val = InputFetcher(loaders.val, None, args.latent_dim, 'val')
 
         # resume training if necessary
         if args.resume_iter > 0:
@@ -174,9 +174,9 @@ class Solver(nn.Module):
             if i % sample_every == 0:
                 step = i + 1
                 src = next(InputFetcher(test_loaders.src, None, args.latent_dim, 'test'))
-                ref = next(InputFetcher(test_loaders.ref, None, args.latent_dim, 'test'))
+                # ref = next(InputFetcher(test_loaders.ref, None, args.latent_dim, 'test'))
                 os.makedirs(args.sample_dir, exist_ok=True)
-                inputs = {'x_src': src.x, 'x_ref': ref.x, 'y_src': src.y, 'y_ref': ref.y}
+                inputs = {'x_src': src.x, 'y_src': src.y}
                 inputs = SimpleNamespace(**inputs)
                 utils.debug_image(nets_ema, args, inputs=inputs, step=step)
 
@@ -268,15 +268,15 @@ def compute_g_loss(nets, args, x_real, y_trg, z_trgs=None, y_org=None, alpha_vec
                 l_params_corr = torch.tensor(0).to(Psi.device).float()
 
             loss = args.lambda_adv * loss_adv + args.lambda_class_fake * loss_class_fake + \
-                   args.lambda_sim * l_sim + args.lambda_grad_sim * l_grad_sim + args.lambda_ano_sim * l_ano_sim + \
-                   args.lambda_params_corr * l_params_corr
+                   args.lambda_rec * l_sim + args.lambda_grad_rec * l_grad_sim + args.lambda_dis_rec * l_ano_sim + \
+                   args.lambda_orth * l_params_corr
 
             loss_latent = Munch(adv=loss_adv.item(), class_fake=loss_class_fake.item(), sim=l_sim.item(),
                                 grad=l_grad_sim.item(), ano_sim=l_ano_sim.item(), l_params_corr=l_params_corr.item())
     else:
         sim_diff = x_fake - x_real
         l_sim = (sim_diff ** 2).mean() + sim_diff.abs().mean()
-        loss = args.lambda_adv * loss_adv + args.lambda_sim
+        loss = args.lambda_adv * loss_adv + args.lambda_rec
         loss_latent = Munch(adv=loss_adv.item(), sim=l_sim.item())
     return loss, loss_latent
 

@@ -12,26 +12,26 @@ def load_args():
     parser.add_argument('--lambda_adv', type=float, default=2, help='adversarial loss for generator')
     parser.add_argument('--lambda_class_fake', type=float, default=2, help='adversarial loss for generator')
 
-    parser.add_argument('--lambda_sim', type=float, default=4, help='Weight for similarity loss')
-    parser.add_argument('--lambda_grad_sim', type=float, default=0, help='Weight for gradients similarity loss')
-    parser.add_argument('--lambda_ano_sim', type=float, default=4, help='Weight for anomaly similarity loss')
+    parser.add_argument('--lambda_rec', type=float, default=4, help='Weight for reconstruction loss')
+    parser.add_argument('--lambda_grad_rec', type=float, default=0, help='Weight for gradients similarity loss')
+    parser.add_argument('--lambda_dis_rec', type=float, default=4, help='Weight for dis-rec loss')
 
-    parser.add_argument('--lambda_params_corr', type=float, default=1, help='Weight for params corr regularization')
+    parser.add_argument('--lambda_orth', type=float, default=1, help='Weight for orthogonal regularization')
 
-    parser.add_argument('--softmax_temp', type=float, default=1, help='Weight for params corr regularization')
+    parser.add_argument('--softmax_temp', type=float, default=1, help='Softmax temperature of classification losses')
 
-    parser.add_argument('--zero_st', type=int, default=1, help='')
-    parser.add_argument('--data_range_norm', type=int, default=1)
+    parser.add_argument('--zero_st', type=int, default=1, help='If 1, set distinction map to zero when style transfer had made')
+    parser.add_argument('--data_range_norm', type=int, default=1, help='If 1, set range of images value from -1 to 1, else from 0 to 1' )
     parser.add_argument('--out_features', type=int, default=1, help='')
 
-    parser.add_argument('--use_pretrained_classifier', type=int, default=0, help='if use given classifier for xai')
+    parser.add_argument('--use_pretrained_classifier', type=int, default=1, help='if use pre-trained classifier for xai')
     parser.add_argument('--classifier_type', type=str, default='', help='stargan or resnet18 or vgg16 or classifier2')
-    parser.add_argument('--classifier_ckpt_path', type=str, default='./', help='checkpoints to classifier weights')
+    parser.add_argument('--classifier_ckpt_path', type=str, default='', help='checkpoints path to classifier weights')
 
     parser.add_argument('--style_dim', type=int, default=64, help='Style code dimension')
     parser.add_argument('--img_size', type=int, default=256, help='Image resolution')
-    parser.add_argument('--img_channels', type=int, default=3, help='Image channels')
-    parser.add_argument('--alpha_blend', type=int, default=1)
+    parser.add_argument('--img_channels', type=int, default=3, help='Image channels, can be 3 or 1')
+    parser.add_argument('--alpha_blend', type=int, default=1, help='If 1, use alpha blend process')
     # new
     parser.add_argument('--num_branches', type=int, default=6)
     parser.add_argument('--branch_dimin', type=int, default=7)  # generator's dimin equals num_branches * branch_dimin (63=9*7 by default)
@@ -61,9 +61,9 @@ def load_args():
     parser.add_argument('--val_batch_size', type=int, default=30,
                         help='Batch size for validation')
     parser.add_argument('--lr', type=float, default=1e-4,
-                        help='Learning rate for D, E and G')
+                        help='Learning rate for D, and G')
     parser.add_argument('--f_lr', type=float, default=1e-6,
-                        help='Learning rate for F')
+                        help='Learning rate for mapping-style network')
     parser.add_argument('--beta1', type=float, default=0.0,
                         help='Decay rate for 1st moment of Adam')
     parser.add_argument('--beta2', type=float, default=0.99,
