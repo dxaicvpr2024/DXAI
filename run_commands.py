@@ -1,7 +1,7 @@
 import os
 
 data_list = ['celeba_hq', 'afhq']
-data_name = data_list[14]
+data_name = data_list[1]
 cuda_id = '1'
 mission_name = 'try_dxai'
 
