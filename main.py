@@ -19,6 +19,7 @@ from core.solver import Solver
 from core.load_args import load_args
 from core.dxai import eval_xai
 
+
 def subdirs(dname):
     return [d for d in os.listdir(dname)
             if os.path.isdir(os.path.join(dname, d))]
@@ -39,30 +40,9 @@ def main(args):
                                              batch_size=args.batch_size,
                                              num_workers=args.num_workers,
                                              img_channels=args.img_channels,
-                                             data_range_norm=args.data_range_norm),
-                        ref=get_train_loader(root=args.train_img_dir,
-                                             which='reference',
-                                             img_size=args.img_size,
-                                             batch_size=args.batch_size,
-                                             num_workers=args.num_workers,
-                                             img_channels=args.img_channels,
-                                             data_range_norm=args.data_range_norm),
-                        val=get_test_loader(root=args.val_img_dir,
-                                            img_size=args.img_size,
-                                            batch_size=args.val_batch_size,
-                                            shuffle=True,
-                                            num_workers=args.num_workers,
-                                            img_channels=args.img_channels,
-                                            data_range_norm=args.data_range_norm))
+                                             data_range_norm=args.data_range_norm))
 
         test_loaders = Munch(src=get_test_loader(root=args.src_dir,
-                                                 img_size=args.img_size,
-                                                 batch_size=args.val_batch_size,
-                                                 shuffle=False,
-                                                 num_workers=args.num_workers,
-                                                 img_channels=args.img_channels,
-                                                 data_range_norm=args.data_range_norm),
-                             ref=get_test_loader(root=args.ref_dir,
                                                  img_size=args.img_size,
                                                  batch_size=args.val_batch_size,
                                                  shuffle=False,
@@ -80,6 +60,8 @@ def main(args):
         raise NotImplementedError
 
     exit()
+
+
 if __name__ == '__main__':
     args = load_args()
     main(args)

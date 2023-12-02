@@ -2,7 +2,7 @@ import os
 
 data_list = ['celeba_hq', 'afhq']
 data_name = data_list[1]
-cuda_id = '1'
+cuda_id = '0'
 mission_name = 'try_dxai'
 
 if not os.path.isdir('output_log'):
