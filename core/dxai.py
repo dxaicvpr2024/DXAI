@@ -27,12 +27,12 @@ def eval_xai(data_name, args, mission_name, classifier_type, use_true_labels=Tru
     show_color = False  # True
     show_only_attr = True  # False #
 
-    save_class_agnostic = False #True  # 
+    save_class_agnostic = True  # False #
 
     lrp_classifier_type = 'classifier3' if 'discriminator' in classifier_type else classifier_type
 
     methods_list = ['rand', 'dxai', 'LayerGradCam', 'GuidedGradCam',
-                    'GradientShap', 'Lime', 'lrp_relu', 'InternalInfluence', 'IntegratedGradients']
+                    'GradientShap', 'lrp_relu', 'InternalInfluence', 'IntegratedGradients', 'Lime']
     beta_list = [0, 0.01, 0.05, 0.1, 0.15, 0.2]
     if global_beta:
         beta_list = [0, 0.25, 0.5, 0.75, 1]

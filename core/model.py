@@ -279,14 +279,14 @@ class GroupedGenerator(nn.Module):
             dim_out = min(dim_in * 2, max_conv_dim)
             if ii < 3:
                 self.encode.append(nn.Sequential(
-                    #ResBlk(dim_in, dim_in, normalize=True, downsample=False, group_num=group_num),
-                    #ResBlk(dim_in, dim_in, normalize=True, downsample=False, group_num=group_num),
-                    #ResBlk(dim_in, dim_in, normalize=True, downsample=False, group_num=group_num),
+                    ResBlk(dim_in, dim_in, normalize=True, downsample=False, group_num=group_num),
+                    ResBlk(dim_in, dim_in, normalize=True, downsample=False, group_num=group_num),
+                    ResBlk(dim_in, dim_in, normalize=True, downsample=False, group_num=group_num),
                     ResBlk(dim_in, dim_out, normalize=True, downsample=True, group_num=group_num)))
                 #
             else:
                 self.encode.append(nn.Sequential(
-                    #ResBlk(dim_in, dim_in, normalize=True, downsample=False, group_num=group_num),
+                    ResBlk(dim_in, dim_in, normalize=True, downsample=False, group_num=group_num),
                     ResBlk(dim_in, dim_out, normalize=True, downsample=True, group_num=group_num)))
 
             if ii >= self.skip_degree:
