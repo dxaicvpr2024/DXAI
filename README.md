@@ -32,5 +32,28 @@ bash download.sh pretrained-dxai-celeba-hq
 
 ```
 ## Evaluation
+```bash
+# afhq
+python main.py --mode eval\
+      --checkpoint_dir expr/checkpoints_afhq_pretrained \
+      --data_name afhq\
+      --mission_name pretrained\
+      --use_pretrained_classifier 1 \
+      --classifier_type resnet18\
+      --num_branches 5\
+      --img_channels 3\
+      --img_size 256\
+      --max_eval_iter 1500 &
 
+# celeba-hq
+python main.py --mode eval\
+      --checkpoint_dir expr/checkpoints_celeba_hq_pretrained \
+      --data_name celeba_hq\
+      --mission_name pretrained\
+      --use_pretrained_classifier 1 \
+      --classifier_type resnet18\
+      --num_branches 5\
+      --img_channels 3\
+      --img_size 256\
+      --max_eval_iter 2000 &
 ## Training
