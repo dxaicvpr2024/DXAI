@@ -53,8 +53,8 @@ def main(args):
         solver.train(loaders, test_loaders)
         print('Training done.')
     elif args.mode == 'eval':
-        eval_xai(args.data_name, args, args.mission_name, args.classifier_type, use_true_labels=True, experiment_type='global_beta')
-        eval_xai(args.data_name, args, args.mission_name, args.classifier_type, use_true_labels=True, experiment_type='faithfulness')
+        eval_xai(args, use_true_labels=True, experiment_type='global_beta')
+        eval_xai(args, use_true_labels=True, experiment_type='faithfulness')
         print('Evaluation done.')
     else:
         raise NotImplementedError

@@ -4,8 +4,8 @@ import argparse
 def load_args():
     parser = argparse.ArgumentParser()
     # changed
-    base_directory = 'data/xray_data/'  # synth_data2/'  #
-    base_sample_directory = 'assets/representative/xray_data/'  # synth_data2/'   #
+    base_directory = '../Data/'
+    base_sample_directory = 'assets/'
     parser.add_argument('--train_img_dir', type=str, default=base_directory + 'train', help='Directory containing training images')
     parser.add_argument('--val_img_dir', type=str, default=base_directory + 'val', help='Directory containing validation images')
     parser.add_argument('--lambda_reg', type=float, default=1, help='Weight for R1 regularization')
@@ -86,8 +86,7 @@ def load_args():
 
     # directory for testing
 
-    parser.add_argument('--src_dir', type=str, default=base_sample_directory + 'src', help='Directory containing input source images')
-    parser.add_argument('--ref_dir', type=str, default=base_sample_directory + 'ref', help='Directory containing input reference images')
+    parser.add_argument('--src_dir', type=str, default=base_sample_directory, help='Directory containing input source images')
 
     parser.add_argument('--print_every', type=int, default=10)
     parser.add_argument('--sample_every', type=int, default=3000)  # 10000

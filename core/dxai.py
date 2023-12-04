@@ -9,13 +9,16 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 args = load_args()
 
 
-def eval_xai(data_name, args, mission_name, classifier_type, use_true_labels=True, experiment_type='global_beta'):
+def eval_xai(args, use_true_labels=True, experiment_type='global_beta'):
     
     assert experiment_type in ('global_beta', 'faithfulness')
-    
+    assert os.path.isdir(args.checkpoint_dir)
+    data_name = args.data_name
+    mission_name = args.mission_name
+    classifier_type = args.classifier_type
     batch_size = 1
 
-    args.resume_iter = get_last_resume_iter('./expr/checkpoints_'+data_name+'_'+mission_name)
+    args.resume_iter = get_last_resume_iter(args.checkpoint_dir)
     threshold2plot = 30
 
     if experiment_type in 'global_beta':
@@ -35,7 +38,7 @@ def eval_xai(data_name, args, mission_name, classifier_type, use_true_labels=Tru
                     'GradientShap', 'lrp_relu', 'InternalInfluence', 'IntegratedGradients', 'Lime']
     beta_list = [0, 0.01, 0.05, 0.1, 0.15, 0.2]
     if global_beta:
-        beta_list = [0, 0.25, 0.5, 0.75, 1]
+        beta_list = [0, 0.2, 0.4, 0.6, 0.8, 1]
     beta_list.sort()
 
     _, test_set = make_datasets(data_name, args.img_channels, args.img_size)
@@ -47,7 +50,7 @@ def eval_xai(data_name, args, mission_name, classifier_type, use_true_labels=Tru
     args.max_eval_iter = min(args.max_eval_iter, int(len(test_set)/batch_size))
     iters_num = min(args.max_eval_iter*batch_size, len(test_set))
     run_name = './xai_output/xai_'+data_name+'_'+mission_name
-    branch_path = './expr/checkpoints_'+data_name+'_'+mission_name+os.sep+format(args.resume_iter, '06d')+'_nets_ema.ckpt'
+    branch_path = args.checkpoint_dir+os.sep+format(args.resume_iter, '06d')+'_nets_ema.ckpt'
     details_dict_path = run_name + os.sep + str(args.resume_iter)+'_details_dict'+'_'+classifier_type+'_'+str(iters_num)+'_iters'+'.pkl'
 
     if global_beta:
