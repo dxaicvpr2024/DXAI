@@ -56,4 +56,25 @@ python main.py --mode eval\
       --img_channels 3\
       --img_size 256\
       --max_eval_iter 2000 &
+```
 ## Training
+To train DXAI from scratch use the following command example or use ![run_commands.py](https://github.com/dxaicvpr2024/DXAI/blob/main/run_commands.py).
+```bash
+# afhq
+python main.py --mode train\
+      --sample_dir expr/samples_afhq_training\
+      --checkpoint_dir expr/checkpoints_afhq_training \
+      --src_dir assets/afhq\
+      --train_img_dir ../Data/afhq/train \
+      --val_img_dir ../Data/afhq/val \
+      --resume_iter 0 \
+      --data_name afhq\
+      --mission_name training\
+      --use_pretrained_classifier 1 \
+      --classifier_type resnet18\
+      --num_branches 5\
+      --img_channels 3\
+      --img_size 256 --batch_size 2\
+      --sample_every 2500 --save_every 10000 --total_iters 300001 &'
+```
+To understand the role of each parameter, please look at ![core/load_args.py](https://github.com/dxaicvpr2024/DXAI/blob/main/core/load_args.py).
