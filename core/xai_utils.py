@@ -36,8 +36,8 @@ class method_values:
 
 
 def make_datasets(data_name, img_channels=1, img_size=256):
-    train_data_folder = '/home/elnatankadar/Data' + os.sep + data_name + os.sep + 'train'
-    test_data_folder = '/home/elnatankadar/Data' + os.sep + data_name + os.sep + 'val'
+    train_data_folder = '../Data' + os.sep + data_name + os.sep + 'train'
+    test_data_folder = '../Data' + os.sep + data_name + os.sep + 'val'
     # test_data_folder =  '/home/elnatankadar/branch_GAN/assets/representative/'+data_name #
 
     class MyRotateTransform:
