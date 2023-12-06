@@ -59,8 +59,9 @@ python main.py --mode eval\
       --img_size 256\
       --max_eval_iter 2000 &
 ```
+The results including the graphs, their AUC and the distinction maps will be stored in `xai_output/`.
 ## Training
-To train DXAI from scratch use the following command example or use [run_commands.py](run_commands.py).
+To train DXAI from scratch use the following command example or use [run_commands.py](run_commands.py). Generated images and network checkpoints will be stored in the `expr/samples` and `expr/checkpoints` directories, respectively.
 ```bash
 # afhq
 python main.py --mode train\
