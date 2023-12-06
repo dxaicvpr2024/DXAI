@@ -35,8 +35,7 @@ def load_args():
     # new
     parser.add_argument('--num_branches', type=int, default=6)
     parser.add_argument('--branch_dimin', type=int, default=7)  # generator's dimin equals num_branches * branch_dimin (63=9*7 by default)
-    parser.add_argument('--use_classifier', type=bool, default=False)
-    parser.add_argument('--data_name', type=str, default=' ')
+    parser.add_argument('--data_name', type=str, default='')
     parser.add_argument('--mission_name', type=str, default='')
 
     parser.add_argument('--style_per_block', type=int, default=True, help='indicates how and whether style code (of a specific image) is should be mixed upon testing')
