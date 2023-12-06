@@ -6,7 +6,7 @@ This new perceptual visualization, can be more helpful and informative in certai
 ![Heatmaps compare](https://github.com/dxaicvpr2024/DXAI/blob/main/heatmaps_compare.jpg)
 
 ## Installation
-The code in this repository is written based on the stragan-v2 code that can be found [here](https://github.com/clovaai/stargan-v2).
+The code in this repository is written based on the stragan-v2 code that can be found [here](https://github.com/clovaai/stargan-v2)[[1]](#1).
 Therefore the installation of the packages and the requirements are similar. To install:
 
 ```bash
@@ -80,3 +80,9 @@ python main.py --mode train\
       --sample_every 2500 --save_every 10000 --total_iters 300001 &'
 ```
 To understand the role of each parameter, please look at ![core/load_args.py](core/load_args.py).
+
+## References
+<a id="1">[1]</a> 
+Yunjey Choi and Youngjung Uh and Jaejun Yoo and Jung-Woo Ha (2020). 
+StarGAN v2: Diverse Image Synthesis for Multiple Domains
+Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition
