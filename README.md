@@ -16,6 +16,8 @@ conda create -n dxai python=3.6.7
 conda activate dxai
 pip install -r requirements.txt
 ```
+The installations and experiments were conducted on a system equipped with an NVIDIA GeForce RTX 2080 Ti GPU, running CUDA version 12.0.
+
 ## Data
 Download AFHQ dataset and pretrained models.
 ```bash
