@@ -79,7 +79,7 @@ python main.py --mode train\
       --img_size 256 --batch_size 2\
       --sample_every 2500 --save_every 10000 --total_iters 300001 &'
 ```
-To understand the role of each parameter, please look at [core/load_args.py](core/load_args.py).
+To understand the role of each argument, please look at [core/load_args.py](core/load_args.py).
 
 ## References
 <a id="1">[1]</a> 
